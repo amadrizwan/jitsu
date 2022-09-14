@@ -16,13 +16,8 @@ import (
 )
 
 const (
-	ApiTokenKey            = "api_key"
-	IPKey                  = "source_ip"
-	apiTokenWarningFreqSec = 10
-)
-
-var (
-	lastApiTokenWarningErrorTime = timestamp.Now().Add(time.Second * -apiTokenWarningFreqSec)
+        ApiTokenKey = "api_key"
+        IPKey       = "source_ip"
 )
 
 func HTTPContextEnrichmentStep(c *gin.Context, event events.Event) {
@@ -63,15 +58,7 @@ func ContextEnrichmentStep(payload events.Event, token string, reqContext *event
 	}
 
 	//4. timestamp & api key
-	payloadApiToken, ok := payload[ApiTokenKey]
-	if !ok {
-		payload[ApiTokenKey] = token
-	} else if payloadApiToken != token {
-		now := timestamp.Now()
-		if now.After(lastApiTokenWarningErrorTime.Add(time.Second * apiTokenWarningFreqSec)) {
-			logging.Warnf("api_key value in event payload: %s differs from the one provided in HTTP-header: %s. That may be a sign of a configuration error. Overriding api_key event property with value from HTTP-header", payloadApiToken, token)
-			lastApiTokenWarningErrorTime = now
-		}
+        if _, ok := payload[ApiTokenKey]; !ok {
 		payload[ApiTokenKey] = token
 	}
 	if _, ok := payload[timestamp.Key]; !ok {
